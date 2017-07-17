@@ -100,6 +100,9 @@ Rpc.prototype.readHandle = function(srvType) {
 	let handleDict = {};
 	this.handleTypeDict[srvType] = handleDict;
 	let dir = ROOT_DIR +"servers/"+ srvType +"/handle";
+	if (!fs.existsSync(dir)) {
+		return;
+	}
 	let files = fs.readdirSync(dir);
 	for (let i in files) {
 		let file = files[i];
@@ -119,6 +122,9 @@ Rpc.prototype.readRemote = function(srvType) {
 	let remoteDict = {};
 	this.remoteTypeDict[srvType] = remoteDict;
 	let dir = ROOT_DIR +"servers/"+ srvType +"/remote";
+	if (!fs.existsSync(dir)) {
+		return;
+	}
 	let files = fs.readdirSync(dir);
 	for (let i in files) {
 		let file = files[i];
