@@ -1,0 +1,10 @@
+{
+  "name": "iron_fight",
+  "version": "0.0.1",
+  "private": false,
+  "dependencies": {
+    "mysql": "=2.13.0",
+    "rbtree": "=0.3.0",
+    "sqlite3": "=3.1.8"
+  }
+}

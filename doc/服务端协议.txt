@@ -1,0 +1,396 @@
+
+服务端传输协议采用Big Endian
+
+协议基本结构
+c => s
+uint16 协议总长度（单位为byte）
+uint8  协议类型（服务端用于识别请求类型，客户端request、notify以及服务端rpc通讯）
+uint16 协议编码（标识该协议进行的操作）
+...... 后面为协议的具体内容，当前版本为json字串，最外层必须是一个object，string类型可分解为uint16(size) + string
+
+s => c
+uint16 协议总长度（单位为byte）
+uint8  协议类型（服务端用于识别请求类型，客户端request、notify以及服务端rpc通讯）
+uint16 协议编码（标识该协议进行的操作）
+...... 后面为协议的具体内容，当前版本为json字串，最外层必须是一个object，string类型可分解为uint16(size) + string
+
+
+
+// 系统（0号预留给系统内部使用）
+SYS_RPC          : 0,
+// 平台
+WEB_STEAM_TICKET : 100, // 平台验证
+// 角色
+ROLE_LOGIN        : 200, // 角色登陆
+ROLE_SELECT_ROBOT : 210, // 改变使用机器人
+// 装备
+EQUIP_CHANGE     : 300, // 更换装备
+EQUIP_UPDATE     : 300, // 装备升级
+// 天赋
+TALENT_CHANGE    : 400, // 更换天赋
+// PVP竞技
+PVP_MATCH_START  : 500, // 匹配对手
+PVP_MATCH_SUCC   : 501, // 匹配成功（进入战斗）
+PVP_BATTLE_END   : 502,  // 战斗结算
+PVP_BATTLE_READY : 503,  // 战斗准备完成，向对连双方派发对方地址
+PVP_SCENE_ALL_READY : 504, // 所有人准备完成，向对连双方派发对方地址
+// 任务
+MISSION_START    : 600, // 开始任务
+MISSION_COMPLETE : 601, // 任务完成
+MISSION_FAILURE  : 602 // 任务失败
+// 测试用GM指令
+GM_GIVE_ROBOT : 2000, // 获得机器人
+GM_GIVE_EQUIP : 2001, // 获得装备
+GM_GIVE_MONEY : 2002, // 获得金钱
+GM_ROBOT_SET_LEVEL : 2003, // 设置机器人等级
+
+
+// 平台
+
+WEB_STEAM_TICKET
+c => s
+{
+	ticket       steam ticket 16进制化
+}
+
+s => c
+None
+
+
+
+// 角色
+
+ROLE_LOGIN
+c => s
+{
+}
+
+s => c
+{}   // 角色数据（待定）
+
+
+ROLE_SELECT_ROBOT
+c => s
+{
+    robotCfgId : 机器人config id
+}
+
+s => c
+{}   // 角色数据（待定）
+
+
+
+// 装备
+
+EQUIP_CHANGE
+c => s
+{
+	equipCfgId : 装备config id
+}
+
+s => c
+{
+    机器人数据
+}
+
+
+EQUIP_UPDATE
+c => s
+{
+    equipCfgId : 装备config id
+}
+
+s => c
+{
+    机器人数据
+}
+
+
+
+// 天赋
+
+TALENT_CHANGE
+c => s
+{
+	talentId  天赋config id
+}
+
+s => c
+{
+    机器人数据
+}
+
+
+
+
+
+// PVP竞技
+
+PVP_MATCH_START
+c => s
+None
+
+s => c
+None
+
+
+PVP_MATCH_SUCC
+s => c
+{
+    "randomSeed": 1490263839,
+    "roles": [
+        {
+            "steamId": "76561198123426625",
+            "roleId": 69,
+            "rank": 0,
+            "robot": {
+                "id": 10001,
+                "hp": 200,
+                "atk": 20,
+                "def": 10,
+                "eng": 50,
+                "engRec": 10,
+                "critRate": 5,
+                "critDef": 5,
+                "atkEngCost": 0,
+                "turboCd": 0,
+                "engReduce": 0,
+                "turboReduce": 0,
+                "head": {
+                    "id": 110003,
+                    "hp": 2067,
+                    "def": 69,
+                    "critDef": 35
+                },
+                "lHand": {
+                    "id": 110001,
+                    "hp": 1992,
+                    "def": 69,
+                    "atk": 1410
+                },
+                "rHand": {
+                    "id": 110002,
+                    "hp": 1992,
+                    "def": 69,
+                    "atk": 271
+                },
+                "lArm": {
+                    "id": 110005,
+                    "engCost": 25
+                },
+                "rArm": {
+                    "id": 110006,
+                    "engCost": 25
+                },
+                "body": {
+                    "id": 110004,
+                    "hp": 1708,
+                    "def": 105,
+                    "eng": 170,
+                    "engRec": 11
+                },
+                "lLeg": {
+                    "id": 110007,
+                    "critRate": 7,
+                    "engReduce": 2
+                },
+                "rLeg": {
+                    "id": 110008,
+                    "critRate": 7,
+                    "engReduce": 2
+                }
+            }
+        },
+        {
+            "steamId": "76561198123426625",
+            "roleId": 68,
+            "rank": 0,
+            "robot": {
+                "id": 10001,
+                "hp": 200,
+                "atk": 20,
+                "def": 10,
+                "eng": 50,
+                "engRec": 10,
+                "critRate": 5,
+                "critDef": 5,
+                "atkEngCost": 0,
+                "turboCd": 0,
+                "engReduce": 0,
+                "turboReduce": 0,
+                "head": {
+                    "id": 110003,
+                    "hp": 2067,
+                    "def": 69,
+                    "critDef": 35
+                },
+                "lHand": {
+                    "id": 110001,
+                    "hp": 1992,
+                    "def": 69,
+                    "atk": 1410
+                },
+                "rHand": {
+                    "id": 110002,
+                    "hp": 1992,
+                    "def": 69,
+                    "atk": 271
+                },
+                "lArm": {
+                    "id": 110005,
+                    "engCost": 25
+                },
+                "rArm": {
+                    "id": 110006,
+                    "engCost": 25
+                },
+                "body": {
+                    "id": 110004,
+                    "hp": 1708,
+                    "def": 105,
+                    "eng": 170,
+                    "engRec": 11
+                },
+                "lLeg": {
+                    "id": 110007,
+                    "critRate": 7,
+                    "engReduce": 2
+                },
+                "rLeg": {
+                    "id": 110008,
+                    "critRate": 7,
+                    "engReduce": 2
+                }
+            }
+        }
+    ]
+}
+
+
+PVP_BATTLE_END
+c => s
+{
+	binary   战斗结果验证数据（待定）
+}
+
+s => c
+{
+	uint32   胜利方role id
+	uint16   奖励分数
+	uint32   奖励金钱
+}
+
+
+PVP_BATTLE_READY
+c => s
+{
+	roleId
+}
+
+s => c
+none
+
+
+PVP_SCENE_ALL_READY
+s => c
+{
+    "p2pInfo": {
+        "40": 62175, 
+        "42": 62174
+    }, 
+    "startTime": 1489667011
+}
+
+
+
+// 任务
+
+MISSION_START
+c => s
+{
+	missoinId   任务id（与config id相同）
+}
+
+s => c
+{
+	missoinId   任务id（与config id相同）
+	hp          护甲（生命）
+	atk         攻击力
+	def         防御力
+	eng         能量
+	engRec      能量回复
+	critRate    暴击率
+	critDef     防爆率
+	atkEng      攻击能量消耗
+	turboCd     涡轮CD
+	engReduce   能耗减免率
+	turboReduce 涡轮CD减免
+}
+
+
+MISSION_COMPLETE
+c => s
+{
+	binary   战斗结果验证数据（待定）
+}
+
+s => c
+{
+	missoinId  任务id（与config id相同）
+	score      奖励分数
+	gold       奖励金钱
+}
+
+
+MISSION_FAILURE
+c => s
+None
+
+s => c
+{
+	missoinId   任务id（与config id相同）
+}
+
+
+
+// 设置
+GM_GIVE_ROBOT
+c => s
+{
+    robotCfgIds : [机器人config id, ...]
+}
+
+s => c
+{}
+
+
+
+GM_GIVE_EQUIP
+c => s
+{
+    equipCfgIds : [装备config id, ...]
+}
+
+s => c
+{}
+
+
+GM_GIVE_MONEY
+c => s
+{
+    money : 10000000,
+    gem : 10000
+}
+
+s => c
+{}
+
+
+GM_ROBOT_SET_LEVEL
+c => s
+{
+    level : 6
+}
+
+s => c
+{}

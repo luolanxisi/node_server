@@ -1,0 +1,78 @@
+
+服务端传输协议采用Big Endian
+
+协议基本结构
+c => s
+uint16 协议总长度（单位为byte）
+uint8  协议类型（服务端用于识别请求类型，客户端request、notify以及服务端rpc通讯）
+uint16 协议编码（标识该协议进行的操作）
+...... 后面为协议的具体内容，当前版本为json字串，最外层必须是一个object，string类型可分解为uint16(size) + string
+
+s => c
+uint16 协议总长度（单位为byte）
+uint8  协议类型（服务端用于识别请求类型，客户端request、notify以及服务端rpc通讯）
+uint16 协议编码（标识该协议进行的操作）
+uint16 错误编码（0表示正确）
+...... 后面为协议的具体内容，当前版本为json字串，最外层必须是一个object，string类型可分解为uint16(size) + string
+
+
+
+// 系统（0号预留给rpc调用）
+SYS_RPC          : 0,
+SYS_RTT          : 1,
+// 平台
+P2P_MSG_PING 		: 1000, // 确定延迟
+P2P_MSG_PING_NOTICE : 1001, // 通知延迟
+P2P_MSG_DOACTION : 1100, // 通知战斗协议
+
+
+
+
+// 平台
+
+1. 确定延迟
+c => s
+{
+	
+	count       	int64
+	
+}
+
+s => c
+{
+	
+	count       	int64
+	
+}
+
+2. 通知延迟
+c => s
+{
+	
+	count       	int64
+	
+}
+
+s => c
+{
+	count       	int64
+}
+
+2. 通知战斗协议
+c => s
+{
+	
+	type       	int32
+	skill_id    int32
+	lian_ji     int32
+	
+}
+
+s => c
+{
+	type       	int32
+	skill_id    int32
+	lian_ji     int32
+	
+}
+
