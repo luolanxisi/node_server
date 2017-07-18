@@ -21,13 +21,9 @@ pro.GM_GIVE_ROBOT = function(roleId, msg, cb) {
 			if (err) {
 				return cb(err);
 			}
-			let retErr;
 			for (let i in list) {
 				let robotCfgId = list[i];
-				retErr = robotMgr.add(robotCfgId);
-			}
-			if (retErr) {
-				cb(retErr);
+				robotMgr.add(robotCfgId);
 			}
 			cb(null, {});
 		});

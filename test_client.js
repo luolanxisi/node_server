@@ -26,6 +26,7 @@ regCase[proto.GM_GIVE_ROBOT]    = {send:sGM_GIVE_ROBOT, recv:rNORMAL_BACK};
 regCase[proto.GM_GIVE_EQUIP]    = {send:sGM_GIVE_EQUIP, recv:rNORMAL_BACK};
 regCase[proto.GM_GIVE_MONEY]    = {send:sGM_GIVE_MONEY, recv:rNORMAL_BACK};
 regCase[proto.GM_ROBOT_SET_LEVEL]    = {send:sGM_ROBOT_SET_LEVEL, recv:rNORMAL_BACK};
+regCase[proto.ROLE_UPDATE_ROBOT]    = {send:sROLE_UPDATE_ROBOT, recv:rNORMAL_BACK};
 //
 regCase[proto.PVP_MATCH_SUCC]   = {recv:rPVP_MATCH_SUCC};
 regCase[proto.PVP_SCENE_ALL_READY] = {recv:rNORMAL_BACK};
@@ -33,19 +34,20 @@ regCase[proto.PVP_SCENE_ALL_READY] = {recv:rNORMAL_BACK};
 var testIdx = 0;
 const testList = [
 	proto.ROLE_LOGIN,
-	proto.GM_GIVE_ROBOT,
-	proto.GM_GIVE_EQUIP,
-	proto.GM_GIVE_MONEY,
-	proto.GM_ROBOT_SET_LEVEL,
-	proto.ROLE_SELECT_ROBOT,
-	// proto.PVP_MATCH_START,
-	// proto.PVP_SCENE_READY,
-	// proto.MISSION_START,
-	// proto.MISSION_COMPLETE,
-	// proto.MISSION_FAILURE,
-	proto.EQUIP_CHANGE,
-	proto.EQUIP_UPDATE,
-	proto.TALENT_CHANGE
+	// proto.GM_GIVE_ROBOT,
+	// proto.GM_GIVE_EQUIP,
+	// proto.GM_GIVE_MONEY,
+	// proto.GM_ROBOT_SET_LEVEL,
+	// proto.ROLE_SELECT_ROBOT,
+		// proto.PVP_MATCH_START,
+		// proto.PVP_SCENE_READY,
+		// proto.MISSION_START,
+		// proto.MISSION_COMPLETE,
+		// proto.MISSION_FAILURE,
+	// proto.EQUIP_CHANGE,
+	// proto.EQUIP_UPDATE,
+	// proto.TALENT_CHANGE,
+	proto.ROLE_UPDATE_ROBOT
 ];
 
 const idx = process.argv[2] || 0;
@@ -53,7 +55,7 @@ const time = parseInt(process.argv[3]) || 1000;
 
 const rttSync = new RttSync();
 const tickets = [
-	"1400000074c2485f2c3e7efb41a3b90901001001ae9f64591800000001000000020000005a6b437100000000feb11f0002000000b2000000320000000400000041a3b90901001001e00100005a6b43710601a8c00000000046a06459c64f805901000000000000000000357690f5b6f58bc6fc66d32a9e46f65eb41d2b2d526f6e9048bb51ddc6ff41434073f14463d019d3660e44e8a0abe5516e8b5dcdb43393efebf0b5ff6795ecf6f592e751d28148de6ed50aa9d2e249466b6f737e2e62a5129578ababa2726157f7de7fd2d732d0eeff6f8303de1db23c6c0c36b5c6ccf285eea5c53904be9fa5",
+	"140000005e84007c12ee55ee41a3b90901001001d78d6d591800000001000000020000007e6b43710000000024c8000001000000b2000000320000000400000041a3b90901001001e00100005a6b43710601a8c00000000046a06459c64f805901000000000000000000357690f5b6f58bc6fc66d32a9e46f65eb41d2b2d526f6e9048bb51ddc6ff41434073f14463d019d3660e44e8a0abe5516e8b5dcdb43393efebf0b5ff6795ecf6f592e751d28148de6ed50aa9d2e249466b6f737e2e62a5129578ababa2726157f7de7fd2d732d0eeff6f8303de1db23c6c0c36b5c6ccf285eea5c53904be9fa5",
 	"14000000bf3b350df96d5438b22f080301001001d995d4581800000001000000020000006a0ff63a00000000812ca90007000000b20000003200000004000000b22f080301001001e00100006a0ff63a1701000a00000000958fc758153fe35801000000000000000000a7ec3ca1115b0e3123dfdbd2fa46d4f8547ecd18385db3959bc0e84233d9bc217d976b62dcdb9871cc088571287691495528a2e188a59f79f0242578ac207bf61efe96ba6c2bb55c0ffc8398d062016a0f55e58c0e5a57303f9068dee40c35a86e5eb357bfe5cbb94a39f993c977e294d377ddb0bf864e35d42a17653429e0fd"
 ];
 const ticket = tickets[idx];
@@ -63,7 +65,7 @@ var client = null;
 var natClient = null; // NAT穿透辅助接口
 var roleId = null;
 
-const webClient = net.createConnection({host:"106.14.156.178", port:8000}, () => { // 用steam平台ticket进行登录 10.0.1.200
+const webClient = net.createConnection({host:"127.0.0.1", port:8000}, () => { // 用steam平台ticket进行登录 106.14.156.178
 	console.log('connected to web server!');
 	let buf = BufferPool.createBuffer();
 	buf.writeInt16BE(0);
@@ -131,6 +133,58 @@ function sROLE_SELECT_ROBOT(client) {
 	buf.writeInt16BE(proto.ROLE_SELECT_ROBOT);
 	buf.writeProtoString(JSON.stringify({
 		robotCfgId : 10001
+	}));
+	client.write(buf.sliceRawBuffer());
+}
+
+function sROLE_UPDATE_ROBOT(client) {
+	let buf = BufferPool.createBuffer();
+	buf.writeInt16BE(0);
+	buf.writeUInt8(protocolType.CLIENT_REQUEST);
+	buf.writeInt16BE(proto.ROLE_UPDATE_ROBOT);
+	buf.writeProtoString(JSON.stringify({
+		robotList: [
+			{
+				id : 10001,
+				headId : 110003,
+				lHandId : 110001,
+				rHandId : 110002,
+				lArmId : 110005,
+				rArmId : 110006,
+				bodyId : 110004,
+				lLegId : 110007,
+				rLegId : 110008,
+				headColor : "#678765",
+				lHandColor : "#678765",
+				rHandColor : "#678765",
+				lArmColor : "#678765",
+				rArmColor : "#678765",
+				bodyColor : "#678765",
+				lLegColor : "#678765",
+				rLegColor : "#678743",
+				talents : [2, 9, 17, 4, 11, 16]
+			},
+			{
+				id : 10002,
+				headId : 120003,
+				lHandId : 120001,
+				rHandId : 120002,
+				lArmId : 120005,
+				rArmId : 120006,
+				bodyId : 120004,
+				lLegId : 120007,
+				rLegId : 120008,
+				headColor : "#678765",
+				lHandColor : "#678765",
+				rHandColor : "#678765",
+				lArmColor : "#678765",
+				rArmColor : "#678765",
+				bodyColor : "#678765",
+				lLegColor : "#678765",
+				rLegColor : "#678776",
+				talents : [9, 7, 2, 11, 3, 14]
+			}
+		]
 	}));
 	client.write(buf.sliceRawBuffer());
 }

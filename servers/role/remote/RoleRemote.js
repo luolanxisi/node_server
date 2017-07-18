@@ -18,7 +18,17 @@ pro.online = function(msg, cb) {
 		if (err) {
 			return cb(err);
 		}
-		role.setOnline(cb);
+		role.setOnline(function(err, res) {
+			if (err) {
+				return cb(err);
+			}
+			role.packLoginData(function(err, res) {
+				if (err) {
+					return cb(err);
+				}
+				cb(null, res);
+			});
+		});
 	});
 }
 

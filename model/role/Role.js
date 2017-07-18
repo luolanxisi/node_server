@@ -17,6 +17,7 @@ function Role(id) {
 	this.gem  = 0;
 	this.p2pPort = 0;
 	this.online = false;
+	this.lastUse = Auxiliary.now(); // for gc
 	// 
 	this.mgrDict = new Dict();
 	this.mgrDict.add(MISSION_MGR,  {class:MissionMgr, obj:null, waitQueue:[]}); // 当有请求开始读取时状态时等待队列不为空，读完后赋值并按顺序回调
@@ -102,11 +103,13 @@ pro.getMgr = function(key, cb) {
 		let waitQueue = mgr.waitQueue;
 		obj.load(function(err, res) {
 			if (err) {
+				console.error(err);
 				mgr.waitQueue = [];
 				return Auxiliary.cbAll(waitQueue, [err]);
 			}
 			obj.afterLoad(function(err, res) {
 				if (err) {
+					console.error(err);
 					mgr.waitQueue = [];
 					return Auxiliary.cbAll(waitQueue, [err]);
 				}
@@ -150,12 +153,30 @@ pro.register = function(cb) {
 
 pro.save = function(cb) {
 	let self = this;
+	let total = this.mgrDict.getSize() + 1;
 	let count = 0;
+	//
+	MysqlExtend.query('UPDATE tbl_role SET rank=?, money=?, gem=?, lastLogin=? WHERE id=?', [this.rank, this.money, this.gem, this.lastLogin, this.id], function (err, res) {
+		if (err) {
+			console.error(err);
+		}
+		++count;
+		if (count >= total) {
+			cb(null, self);
+		}
+	});
+	//
+	
 	let mgrDict = this.mgrDict.getRaw();
 	for ( let key in mgrDict ) {
 		this.getMgr(key, function(err, mgr) {
 			if (err) {
 				console.error(err);
+				++count;
+				if (count >= total) {
+					cb(null, self);
+				}
+				return;
 			}
 			mgr.save(function(err, res) {
 				if (err) {
@@ -172,12 +193,15 @@ pro.save = function(cb) {
 
 pro.load = function(cb) {
 	let self = this;
-	MysqlExtend.query('SELECT name, regTime, lastLogin, p2pPort FROM tbl_role WHERE id=? LIMIT 1', [this.id], function (err, res) {
+	MysqlExtend.query('SELECT name, rank, money, gem, regTime, lastLogin, p2pPort FROM tbl_role WHERE id=? LIMIT 1', [this.id], function (err, res) {
 		if (err) {
 			return cb(ErrorCode.LOGIN_ERROR);
 		}
 		let row        = res[0];
 		self.name      = row.name;
+		self.rank      = row.rank || 0;
+		self.money     = row.money || 0;
+		self.gem       = row.gem || 0;
 		self.regTime   = row.regTime;
 		self.lastLogin = row.lastLogin;
 		self.p2pPort   = row.p2pPort || 0;
@@ -197,7 +221,7 @@ pro.load = function(cb) {
 
 // load之后执行，数据之间有依赖的放在此处（如：机器人之间有队伍组合加成）
 pro.afterLoad = function(cb) {
-	this.lastLogin = Math.floor((new Date()).getTime() / 1000);
+	this.lastLogin = Auxiliary.now();
 	cb(null, this);
 }
 
@@ -216,5 +240,41 @@ pro.destory = function(cb) {
 	cb();
 }
 
+pro.packLoginData = function(cb) {
+	let self = this;
+	let ret = {
+		id    : this.id,
+		name  : this.name,
+		rank  : this.rank,
+		money : this.money,
+		gem   : this.gem
+	};
+	self.getRobotMgr(function(err, robotMgr) {
+		if (err) {
+			return cb(err);
+		}
+		ret.robotData = robotMgr.toData();
+		self.getMissionMgr(function(err, missionMgr) {
+			if (err) {
+				return cb(err);
+			}
+			ret.missionData = missionMgr.toData();
+			cb(null, ret);
+		});
+	});
+	// self.getMissionMgr();
+}
+
+pro.stampLastUse = function() {
+	this.lastUse = Auxiliary.now();
+}
+
+pro.setLastUse = function(value) {
+	this.lastUse = value;
+}
+
+pro.getLastUse = function() {
+	return this.lastUse;
+}
 
 

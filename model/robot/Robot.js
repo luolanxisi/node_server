@@ -61,6 +61,14 @@ pro.init = function(cfgId) {
 	this.body = this.createEquip(robotData.bodyId);
 	this.lLeg = this.createEquip(robotData.lLegId);
 	this.rLeg = this.createEquip(robotData.rLegId);
+	this.headColor = "";
+	this.lHandColor = "";
+	this.rHandColor = "";
+	this.lArmColor = "";
+	this.rArmColor = "";
+	this.bodyColor = "";
+	this.lLegColor = "";
+	this.rLegColor = "";
 	// 天赋树共6层，每层3选1，初始有一个确定天赋
 	this.talents = this.initTalent(robotData.firstTalentId);
 	// 
@@ -68,7 +76,43 @@ pro.init = function(cfgId) {
 }
 
 pro.load = function(data) {
-	this.id = data.id || 10001;
+	this.id          = data.id || 10001;
+	this.exp         = data.exp || 0; // 熟练度经验
+	this.level       = data.level || 0; // 熟练度等级
+	//
+	this.hp          = 0; // 护甲（生命）
+	this.atk         = 0; // 攻击力
+	this.def         = 0; // 防御力
+	this.eng         = 0; // 能量
+	this.engRec      = 0; // 能量恢复
+	this.critRate    = 0; // 暴击率
+	this.critDef     = 0; // 防爆率
+	this.atkEngCost  = 0; // 攻击能量消耗
+	this.turboCd     = 0; // 涡轮CD
+	this.engReduce   = 0; // 能耗减免率
+	this.turboReduce = 0; // 涡轮CD减免
+	// 创建装备
+	this.head = this.createEquip(data.headId);
+	this.lHand = this.createEquip(data.lHandId);
+	this.rHand = this.createEquip(data.rHandId);
+	this.lArm = this.createEquip(data.lArmId);
+	this.rArm = this.createEquip(data.rArmId);
+	this.body = this.createEquip(data.bodyId);
+	this.lLeg = this.createEquip(data.lLegId);
+	this.rLeg = this.createEquip(data.rLegId);
+	//
+	this.headColor  = data.headColor || "";
+	this.lHandColor = data.lHandColor || "";
+	this.rHandColor = data.rHandColor || "";
+	this.lArmColor  = data.lArmColor || "";
+	this.rArmColor  = data.rArmColor || "";
+	this.bodyColor  = data.bodyColor || "";
+	this.lLegColor  = data.lLegColor || "";
+	this.rLegColor  = data.rLegColor || "";
+	// 天赋树共6层，每层3选1，初始有一个确定天赋
+	this.talents = data.talents;
+	// 
+	this.recount();
 }
 
 pro.setLevel = function(value) {
@@ -397,6 +441,9 @@ pro.countDegree = function() {
 pro.toData = function() {
 	return {
 		id          : this.id,
+		exp         : this.exp,
+		level       : this.level,
+		//
 		hp          : this.hp,
 		atk         : this.atk,
 		def         : this.def,
@@ -416,13 +463,42 @@ pro.toData = function() {
 		rArm      : this.rArm,
 		body      : this.body,
 		lLeg      : this.lLeg,
-		rLeg      : this.rLeg
+		rLeg      : this.rLeg,
+		//
+		headColor  : this.headColor,
+		lHandColor : this.lHandColor,
+		rHandColor : this.rHandColor,
+		lArmColor  : this.lArmColor,
+		rArmColor  : this.rArmColor,
+		bodyColor  : this.bodyColor,
+		lLegColor  : this.lLegColor,
+		rLegColor  : this.rLegColor,
+		talents    : this.talents
 	};
 }
 
 pro.pack = function() {
 	return {
-		id : this.id
+		id      : this.id,
+		exp     : this.exp,
+		level   : this.level,
+		headId  : this.head.id,
+		lHandId : this.lHand.id,
+		rHandId : this.rHand.id,
+		lArmId  : this.lArm.id,
+		rArmId  : this.rArm.id,
+		bodyId  : this.body.id,
+		lLegId  : this.lLeg.id,
+		rLegId  : this.rLeg.id,
+		headColor  : this.headColor,
+		lHandColor : this.lHandColor,
+		rHandColor : this.rHandColor,
+		lArmColor  : this.lArmColor,
+		rArmColor  : this.rArmColor,
+		bodyColor  : this.bodyColor,
+		lLegColor  : this.lLegColor,
+		rLegColor  : this.rLegColor,
+		talents    : this.talents
 	};
 }
 

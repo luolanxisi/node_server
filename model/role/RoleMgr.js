@@ -10,8 +10,16 @@ module.exports.getInst = function() {
 };
 
 function RoleMgr() {
+	if (ServerMgr.getCurrentServer().type != "role") {
+		console.error("Use role mgr not in role process !!");
+		return;
+	}
+	let self = this;
 	this.pool = new Dict();
 	this.waitQueueDict = {};
+	setInterval(function() {
+		self.save(function() {console.log("save end >>>>>>");}); // Auxiliary.normalCb
+	}, 300 * 1000);
 }
 
 const pro = RoleMgr.prototype;
@@ -41,6 +49,7 @@ pro.get = function(roleId, cb) {
 		});
 	}
 	else {
+		role.stampLastUse();
 		cb(null, role);
 	}
 }
@@ -52,12 +61,18 @@ pro.remove = function(roleId, cb) {
 
 // 定时保存
 pro.save = function(cb) {
+	let self = this;
+	let now = Auxiliary.now();
 	let size = this.pool.getSize();
 	let count = 0;
+	if (this.pool.getSize() <= 0) {
+		return cb();
+	}
 	let roles = this.pool.getRaw();
 	for (let i in roles) {
 		let role = roles[i];
 		role.save(function(err) {
+			self.checkGc(role, now);
 			if (err) {
 				console.error("save role fail!!", err);
 			}
@@ -66,6 +81,13 @@ pro.save = function(cb) {
 				cb();
 			}
 		});
+	}
+}
+
+pro.checkGc = function(role, now) {
+	if ( now - role.getLastUse() > 300 ) { // 300
+		this.remove(role.getId(), Auxiliary.normalCb);
+		role.destory(Auxiliary.normalCb);
 	}
 }
 

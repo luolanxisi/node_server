@@ -32,6 +32,10 @@ pro.hasEquip = function(equipCfgId) {
 	return this.openEquips.has(equipCfgId);
 }
 
+pro.has = function(cfgId) {
+	return this.pool.has(cfgId);
+}
+
 pro.add = function(cfgId) {
 	if (this.pool.has(cfgId)) {
 		return;
@@ -42,14 +46,14 @@ pro.add = function(cfgId) {
 }
 
 pro.get = function(cfgId) {
-	this.pool.get(cfgId);
+	return this.pool.get(cfgId);
 }
 
 pro.setCurRobot = function(cfgId) {
 	let robot = this.pool.get(cfgId);
 	if (!robot) {
 		return Auxiliary.createError(ErrorCode.ROBOT_NOT_EXIST);
-;	}
+	}
 	this.curRobot = robot;
 }
 
@@ -74,7 +78,20 @@ pro.register = function(cb) {
 // save在DbPackEntity中实现
 
 pro.load = function(cb) {
-	cb();
+	let self = this;
+	MysqlExtend.query('SELECT robotData FROM tbl_role WHERE id=? LIMIT 1', [this.roleId], function (err, res) {
+		if (err) {
+			return cb(err);
+		}
+		let obj = JSON.parse(res[0].robotData);
+		self.setCurRobot(obj.curRobotId);
+		for (let i in obj.elements) {
+			let robotData = obj.elements[i];
+			let robot = Robot.createLoad(robotData);
+			self.pool.add(robot.getId(), robot);
+		}
+		cb();
+	});
 }
 
 pro.afterLoad = function(cb) {
@@ -101,8 +118,25 @@ pro.pack = function() {
 		let element = elements[i];
 		arr.push(element.pack());
 	}
-	return arr;
+	let ret = {
+		curRobotId : this.curRobot != null ? this.curRobot.getId() : 0,
+		elements   : arr
+	};
+	return ret;
 }
 
+pro.toData = function() {
+	let elements = this.pool.getRaw();
+	let arr = [];
+	for (let i in elements) {
+		let element = elements[i];
+		arr.push(element.toData());
+	}
+	let ret = {
+		curRobotId : this.curRobot != null ? this.curRobot.getId() : 0,
+		elements   : arr
+	};
+	return ret;
+}
 
 

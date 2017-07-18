@@ -10,8 +10,9 @@ const Dict         = require(ROOT_DIR +'lib/collection/Dict');
 module.exports = MissionMgr;
 
 function MissionMgr(roleId) {
+	DbPackEntity.call(this, "tbl_role", {"id":"roleId"}, "missionData");
 	this.roleId = roleId;
-	this.elements = new Dict();
+	this.pool = new Dict();
 	this.curMission = 0;
 }
 
@@ -21,11 +22,11 @@ var pro = MissionMgr.prototype;
 
 
 pro.add = function(mission) {
-	this.elements.add(mission.getId(), mission);
+	this.pool.add(mission.getId(), mission);
 }
 
 pro.get = function(id) {
-	return this.elements.get(id);
+	return this.pool.get(id);
 }
 
 pro.setCurMission = function(value) {
@@ -65,7 +66,7 @@ pro.load = function(cb) {
 			mission.load(missionData);
 			self.add(mission);
 		}
-		self.afterLoad(cb);
+		cb();
 	});
 }
 
@@ -92,6 +93,17 @@ pro.pack = function() {
 		let element = elements[i];
 		arr.push(element.pack());
 	}
-	return arr;
+	let ret = {elements:arr};
+	return ret;
 }
 
+pro.toData = function() {
+	let elements = this.pool.getRaw();
+	let arr = [];
+	for (let i in elements) {
+		let element = elements[i];
+		arr.push(element.toData());
+	}
+	let ret = {elements:arr};
+	return ret;
+}

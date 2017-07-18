@@ -1,7 +1,5 @@
 "use strict";
 
-const RoleMgr = require(ROOT_DIR +'model/role/RoleMgr').getInst();
-
 
 module.exports = Remote;
 

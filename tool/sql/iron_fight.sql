@@ -11,6 +11,9 @@ CREATE TABLE `tbl_platform` (
 CREATE TABLE `tbl_role` (
   `id` int(11) NOT NULL auto_increment,
   `name` varchar(64),
+  `rank` int(11) not null DEFAULT 0 COMMENT '积分',
+  `money` int(11) not null DEFAULT 0 COMMENT '金钱',
+  `gem` int(11) not null DEFAULT 0 COMMENT '宝石',
   `p2pPort` int(11) not null DEFAULT 8081 COMMENT 'P2P端口',
   `regTime` int(11) not null COMMENT '注册时间',
   `lastLogin` int(11) not null COMMENT '最后登录时间',

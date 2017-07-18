@@ -12,8 +12,12 @@ pro.ROLE_LOGIN = function(_null, msg, cb, clientSocket) {
 	let ticket = msg.ticket;
 	let session = SessionMgr.checkAndCreate(ticket, clientSocket);
 	if ( session ) {
-		App.callRemote("role.RoleRemote.online", session.roleId, {roleId:session.roleId}, Auxiliary.normalCb);
-		cb(null, {roleId:session.roleId});
+		App.callRemote("role.RoleRemote.online", session.roleId, {roleId:session.roleId}, function(err, res) {
+			if (err) {
+				return cb(Auxiliary.createError(ErrorCode.CREATE_SESSION));
+			}
+			cb(null, res);
+		});
 	}
 	else {
 		cb(Auxiliary.createError(ErrorCode.CREATE_SESSION));

@@ -32,6 +32,13 @@ pro.getRank = function() {
 
 pro.pack = function() {
 	return {
+		id: this.id
+	};
+}
+
+pro.toData = function() {
+	return {
+		id: this.id
 	};
 }
 
