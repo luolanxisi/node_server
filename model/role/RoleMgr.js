@@ -18,7 +18,7 @@ function RoleMgr() {
 	this.pool = new Dict();
 	this.waitQueueDict = {};
 	setInterval(function() {
-		self.save(function() {console.log("save end >>>>>>");}); // Auxiliary.normalCb
+		self.save(function() {console.log("save end >>>>>>", ServerMgr.getCurrentServer().id);}); // Auxiliary.normalCb
 	}, 300 * 1000);
 }
 
