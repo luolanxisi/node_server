@@ -26,8 +26,8 @@ pro.init = function() {
 		for ( let i in servers ) {
 			let cfg = servers[i];
 			console.log(cfg);
-			let out = fs.openSync('log/'+ cfg.port +'.log', 'a');
-			let err = fs.openSync('log/'+ cfg.port +'.log', 'a');
+			let out = fs.openSync('log/'+ cfg.port +'_out.log', 'w');
+			let err = fs.openSync('log/'+ cfg.port +'_err.log', 'w');
 			// this.srvDict[cfg.port] = childProcess.fork(ROOT_DIR +"Application.js", [srvId, srvType, cfg.port, cfg.clientPort]);
 			// this.srvDict[cfg.port] = childProcess.spawn("nohup", ['node', ROOT_DIR +"Application.js", srvId, srvType, cfg.port, cfg.clientPort], {stdio:[process.stdin, process.stdout, process.stderr, 'ipc']});
 			this.srvDict[cfg.port] = childProcess.spawn("node", [ROOT_DIR +"Application.js", srvId, srvType, cfg.port, cfg.clientPort], {detached: true, stdio:['ignore', out, err, 'ipc']});

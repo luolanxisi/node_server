@@ -49,6 +49,9 @@ pro.join = function(data, cb) {
 
 pro.quit = function(roleId) {
 	let obj = this.joinHash[roleId];
+	if (obj == null) {
+		return;
+	}
 	delete this.joinHash[roleId];
 	let rankLevel = Math.floor(obj.rank / 1000);
 	let list = this.rankPool[rankLevel];
