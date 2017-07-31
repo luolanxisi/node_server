@@ -1,6 +1,7 @@
 "use strict";
 
 const net = require('net');
+const fs = require('fs');
 const childProcess = require('child_process');
 
 global.ROOT_DIR = __dirname +"/";
@@ -24,9 +25,12 @@ pro.init = function() {
 		let servers = srvCfg[srvType];
 		for ( let i in servers ) {
 			let cfg = servers[i];
+			console.log(cfg);
+			let out = fs.openSync('log/'+ cfg.port +'.log', 'a');
+			let err = fs.openSync('log/'+ cfg.port +'.log', 'a');
 			// this.srvDict[cfg.port] = childProcess.fork(ROOT_DIR +"Application.js", [srvId, srvType, cfg.port, cfg.clientPort]);
 			// this.srvDict[cfg.port] = childProcess.spawn("nohup", ['node', ROOT_DIR +"Application.js", srvId, srvType, cfg.port, cfg.clientPort], {stdio:[process.stdin, process.stdout, process.stderr, 'ipc']});
-			this.srvDict[cfg.port] = childProcess.spawn("node", [ROOT_DIR +"Application.js", srvId, srvType, cfg.port, cfg.clientPort], {stdio:[process.stdin, process.stdout, process.stderr, 'ipc']});
+			this.srvDict[cfg.port] = childProcess.spawn("node", [ROOT_DIR +"Application.js", srvId, srvType, cfg.port, cfg.clientPort], {detached: true, stdio:['ignore', out, err, 'ipc']});
 			serverMgr.add(srvId, srvType, cfg);
 			++srvId;
 			this.regMessage(this.srvDict[cfg.port], cfg.port);
