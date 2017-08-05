@@ -236,7 +236,7 @@ function createRpcServer(port, cb) {
 		});
 
 		client.on('error', (err) => {
-			console.log('client error:', err);
+			console.log('client [rpc] error:', err);
 		});
 
 		client.on('data', (data) => {
@@ -340,29 +340,34 @@ function createGameServer(port, cb) {
 
 		client.on('error', (err) => {
 			SessionMgr.remove(client);
-			console.log('client error:', err);
+			console.log('client [game] error:', err);
 		});
 
 		client.on('data', (data) => {
+			let cmd;
 			try {
 				// if ( client.remoteAddress == "::ffff:127.0.0.1" )
 				let buf = BufferPool.decorateBuffer(data);
 				let len = buf.readInt16BE();
 				let pType = buf.readUInt8();
-				let cmd = buf.readInt16BE();
+				cmd = buf.readInt16BE();
 				let cbId = 0;
 				let fromSrvId = 0;
 				if ( pType == protocolType.SERVER_HANDLE_BACK ) {
 					fromSrvId = buf.readInt16BE();
 					cbId = buf.readInt16BE();
 				}
+				let session = SessionMgr.get(client);
+				if (session == null) {
+					let server = ServerMgr.getCurrentServer();
+					console.error("socket data >>>>>>>>>>>>>", 'len', len, ', cmd', cmd, 'real size:', data.length, server.type, server.port);
+				}
 				let arr = protoTrans[cmd].split('.');
 				let srvType = arr[0];
 				let handleName = arr[1];
 				let funcName = arr[2];
-				let session = SessionMgr.get(client);
 				if (session == null) { // session不存在的阶段一定都是直连，主要是web和connector
-					console.error("socket data >>>>>>>>>>>>>", 'type', pType, ', cmd', cmd, protoTrans[cmd]);
+					//console.error("socket data >>>>>>>>>>>>>", 'len', len, ', cmd', cmd, 'real size:', data.length, srvType, handleName);
 					let handle = App.rpc.handleTypeDict[srvType][handleName];
 					handle[funcName].call(handle, null, JSON.parse(buf.readProtoString()), function(err, obj, close) {
 						let retBuf = BufferPool.createProtoBuffer(cmd, protocolType.CLIENT_REQUEST);
@@ -381,7 +386,7 @@ function createGameServer(port, cb) {
 					}, client);
 				}
 				else { // 由于客户端从connector或web进，因此进入此分支必为转发
-					console.error("socket data >>>>>>>>>>>>>", 'type', pType, ', cmd', cmd, ', roleId', session.roleId, protoTrans[cmd]);
+					//console.error("socket data >>>>>>>>>>>>>", 'type', pType, ', cmd', cmd, ', roleId', session.roleId);
 					let server = ServerMgr.getByDispatch(srvType, session.roleId);
 					if ( server.id == App.srvId ) { // 直连端口，无需分服
 						let handle = App.rpc.handleTypeDict[srvType][handleName];
@@ -407,7 +412,8 @@ function createGameServer(port, cb) {
 					}
 				}
 			} catch (e) {
-				console.error("catch error", e);
+				let server = ServerMgr.getCurrentServer();
+				console.log("catch error", cmd, server, e);
 			}
 		});
 

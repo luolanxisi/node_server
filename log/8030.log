@@ -1,0 +1,25 @@
+rpc start listen 8030
+server start listen 8020
+rpc connected
+rpc connected
+rpc connected
+rpc connected
+rpc connected
+rpc data >>>>>>>>>>>>> type 12 , cmd 0
+connector.RoleRemote.webLogin
+client connected
+socket data >>>>>>>>>>>>> len 494 , cmd 200 real size: 494 connector 8030
+rpc data >>>>>>>>>>>>> type 13 , cmd 0
+Child exited with code 1
+events.js:160
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: Connection lost: The server closed the connection.
+    at Protocol.end (/root/temp/node_server/node_modules/mysql/lib/protocol/Protocol.js:109:13)
+    at Socket.<anonymous> (/root/temp/node_server/node_modules/mysql/lib/Connection.js:109:28)
+    at emitNone (events.js:91:20)
+    at Socket.emit (events.js:185:7)
+    at endReadableNT (_stream_readable.js:974:12)
+    at _combinedTickCallback (internal/process/next_tick.js:80:11)
+    at process._tickCallback (internal/process/next_tick.js:104:9)
