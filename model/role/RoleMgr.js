@@ -18,7 +18,13 @@ function RoleMgr() {
 	this.pool = new Dict();
 	this.waitQueueDict = {};
 	setInterval(function() {
-		self.save(function() {console.log("save end >>>>>>", ServerMgr.getCurrentServer().id);}); // Auxiliary.normalCb
+		try {
+			self.save(function() {
+				console.log("save end >>>>>>", ServerMgr.getCurrentServer().id);
+			});
+		} catch (e) {
+			console.log("Save tick error:", e);
+		}		
 	}, 300 * 1000);
 }
 

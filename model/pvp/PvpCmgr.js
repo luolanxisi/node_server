@@ -17,7 +17,11 @@ function PvpCmgr() {
 	}
 	let self = this;
 	this.tick = setInterval(function() {
-		self.matchClip();
+		try {
+			self.matchClip();
+		} catch (e) {
+			console.log("Match tick error:", e);
+		}
 	}, 3000); // 10000
 }
 

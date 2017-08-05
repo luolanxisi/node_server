@@ -16,8 +16,12 @@ function RankCmgr() {
 	}
 	let self = this;
 	this.tick = setInterval(function() {
-		self.matchClip();
-	}, 10000);
+		try {
+			self.matchClip();
+		} catch (e) {
+			console.log("Rank tick error:", e);
+		}
+	}, 10 * 1000);
 }
 
 var pro = RankCmgr.prototype;
