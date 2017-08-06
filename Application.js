@@ -365,7 +365,6 @@ function createGameServer(port, cb) {
 				let handleName = arr[1];
 				let funcName = arr[2];
 				if (session == null) { // session不存在的阶段一定都是直连，主要是web和connector
-					//console.error("socket data >>>>>>>>>>>>>", 'len', len, ', cmd', cmd, 'real size:', data.length, srvType, handleName);
 					let handle = App.rpc.handleTypeDict[srvType][handleName];
 					handle[funcName].call(handle, null, JSON.parse(buf.readProtoString()), function(err, obj, close) {
 						let retBuf = BufferPool.createProtoBuffer(cmd, protocolType.CLIENT_REQUEST);
@@ -377,14 +376,14 @@ function createGameServer(port, cb) {
 							jsonStr = JSON.stringify(obj);
 						}
 						retBuf.writeProtoString(jsonStr);
-						client.write(retBuf.sliceRawBuffer());
+						let retRawBuf = retBuf.sliceRawBuffer();
+						let flushResult = client.write(retRawBuf);
 						if (close) {
-							client.end();
+							//client.end();
 						}
 					}, client);
 				}
 				else { // 由于客户端从connector或web进，因此进入此分支必为转发
-					//console.error("socket data >>>>>>>>>>>>>", 'type', pType, ', cmd', cmd, ', roleId', session.roleId);
 					let server = ServerMgr.getByDispatch(srvType, session.roleId);
 					if ( server.id == App.srvId ) { // 直连端口，无需分服
 						let handle = App.rpc.handleTypeDict[srvType][handleName];
