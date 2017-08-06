@@ -154,7 +154,7 @@ Rpc.prototype.genCb = function(cb) {
 }
 
 Rpc.prototype.runCb = function(cbId, msg) { // 对于handle是buf，对于remote是msg
-	let rpcCallback = this.cbList.get(cbId);
+	let rpcCallback = this.cbList.remove(cbId);
 	if ( msg.errCode ) {
 		rpcCallback.cb(msg);
 	}
@@ -172,8 +172,7 @@ function fitToServerHandle(clientSocket, session, buf, cmd) {
 	fitBuf.writeInt16BE(App.srvId);
 	let cbId = App.rpc.genCb(function(err, buf) {
 		if (err) {
-			console.error("Error in fitToServerHandle");
-			return;
+			console.error("Error in fitToServerHandle", err);
 		}
 		clientSocket.write(buf.sliceRawBuffer());
 	});
@@ -247,7 +246,7 @@ function createRpcServer(port, cb) {
 				let cmd = buf.readInt16BE();
 				let fromSrvId = buf.readInt16BE();
 				let cbId = buf.readInt16BE();
-				console.error("rpc data >>>>>>>>>>>>>", 'type', pType, ', cmd', cmd);
+				console.log("rpc data >>>>>>>>>>>>>", 'type', pType, ', cmd', cmd);
 				if ( pType == protocolType.SERVER_REMOTE_CALL ) {
 					let procChain = buf.readProtoString();
 					let msgStr = buf.readProtoString();
@@ -257,7 +256,7 @@ function createRpcServer(port, cb) {
 					let remoteName = arr[1];
 					let funcName = arr[2];
 					let remote = App.rpc.remoteTypeDict[srvType][remoteName];
-					console.error(procChain);
+					console.log('>>>', procChain);
 					remote[funcName]([msg, function(err, obj) { // 原remote已被替换
 						let retBuf = BufferPool.createProtoBuffer(cmd, protocolType.SERVER_REMOTE_BACK);
 						retBuf.writeInt16BE(App.srvId); // srvId修改为本服，cbId不需要修改
@@ -360,7 +359,7 @@ function createGameServer(port, cb) {
 				let session = SessionMgr.get(client);
 				if (session == null) {
 					let server = ServerMgr.getCurrentServer();
-					console.error("socket data >>>>>>>>>>>>>", 'len', len, ', cmd', cmd, 'real size:', data.length, server.type, server.port);
+					console.error("socket data >>>>>>>>>>>>>", 'len', len, ', cmd', cmd, ', real size:', data.length, server.type, server.port);
 				}
 				let arr = protoTrans[cmd].split('.');
 				let srvType = arr[0];
@@ -421,7 +420,6 @@ function createGameServer(port, cb) {
 	});
 
 	server.on('error', (err) => {
-		// throw err;
 		console.log('server has error', err);
 	});
 
