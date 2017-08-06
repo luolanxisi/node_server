@@ -10,7 +10,7 @@ const dict = {
 	// 角色
 	ROLE_LOGIN        : 200, // 角色登陆
 	ROLE_SELECT_ROBOT : 210, // 改变使用机器人
-	ROLE_UPDATE_ROBOT : 211, // 改变机器人数据
+	ROLE_UPDATE_INFO  : 211, // 改变玩家数据
 	// 装备
 	EQUIP_CHANGE     : 300, // 更换装备
 	EQUIP_UPDATE     : 301, // 装备升级（升级后原来装备将消失）
@@ -48,7 +48,7 @@ transDict[dict.WEB_STEAM_TICKET] = "web.SteamHandle.WEB_STEAM_TICKET";
 // 角色
 transDict[dict.ROLE_LOGIN]        = "connector.RoleHandle.ROLE_LOGIN";
 transDict[dict.ROLE_SELECT_ROBOT] = "role.RoleHandle.ROLE_SELECT_ROBOT";
-transDict[dict.ROLE_UPDATE_ROBOT] = "role.RoleHandle.ROLE_UPDATE_ROBOT";
+transDict[dict.ROLE_UPDATE_INFO]  = "role.RoleHandle.ROLE_UPDATE_INFO";
 // 装备										
 transDict[dict.EQUIP_CHANGE]     = "role.EquipHandle.EQUIP_CHANGE";
 transDict[dict.EQUIP_UPDATE]     = "role.EquipHandle.EQUIP_UPDATE";

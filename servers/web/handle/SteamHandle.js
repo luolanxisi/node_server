@@ -39,18 +39,21 @@ pro.WEB_STEAM_TICKET = function(role, msg, cb) {
 			// 该处还未保证sql执行原子性
 			MysqlExtend.query('SELECT roleId FROM tbl_platform WHERE id=? LIMIT 1', [platformId], function (err, res) {
 				if (err) {
+					console.log(err);
 					return cb(Auxiliary.createError(ErrorCode.CREATE_ROLE), null, true);
 				}
 				if ( res.length == 0 ) { // 新建账号
 					let regTime = Math.floor((new Date()).getTime() / 1000);
-					MysqlExtend.query("INSERT INTO tbl_role(name, regTime, lastLogin, missionData, robotData, equipData, talentData) VALUES(?, ?, ?, '{}', '{}', '{}', '{}')", ['Guest', regTime, regTime], function (err, res) {
+					MysqlExtend.query("INSERT INTO tbl_role(name, regTime, lastLogin, missionData, robotData, itemData) VALUES(?, ?, ?, '{}', '{}', '{}')", ['Guest', regTime, regTime], function (err, res) {
 						if (err) {
+							console.log(err);
 							return cb(Auxiliary.createError(ErrorCode.CREATE_ROLE), null, true);
 						}
 						let roleId = res.insertId;
 						// console.error(roleId);
 						MysqlExtend.query('INSERT INTO tbl_platform(id, roleId) VALUES(?, ?)', [platformId, roleId], function (err, res) {
 							if (err) {
+								console.log(err);
 								return cb(Auxiliary.createError(ErrorCode.CREATE_ROLE), null, true);
 							}
 							loginSucc(roleId, ticket, steamId, cb);

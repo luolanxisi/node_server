@@ -25,12 +25,12 @@ pro.init = function() {
 		let servers = srvCfg[srvType];
 		for ( let i in servers ) {
 			let cfg = servers[i];
-			let logFile = 'log/'+ cfg.port +'.log';
-			if (fs.existsSync(logFile)) {
-				fs.unlinkSync(logFile);
-			}
-			let out = fs.openSync(logFile, 'a');
-			let err = fs.openSync(logFile, 'a');
+			// let logFile = 'log/'+ cfg.port +'.log';
+			// if (fs.existsSync(logFile)) {
+			// 	fs.unlinkSync(logFile);
+			// }
+			// let out = fs.openSync(logFile, 'a');
+			// let err = fs.openSync(logFile, 'a');
 			// this.srvDict[cfg.port] = childProcess.fork(ROOT_DIR +"Application.js", [srvId, srvType, cfg.port, cfg.clientPort]);
 			// this.srvDict[cfg.port] = childProcess.spawn("nohup", ['node', ROOT_DIR +"Application.js", srvId, srvType, cfg.port, cfg.clientPort], {stdio:[process.stdin, process.stdout, process.stderr, 'ipc']});
 			// this.srvDict[cfg.port] = childProcess.spawn("node", [ROOT_DIR +"Application.js", srvId, srvType, cfg.port, cfg.clientPort], {detached: true, stdio:['ignore', out, err, 'ipc']});

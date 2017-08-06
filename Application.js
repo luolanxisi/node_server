@@ -357,10 +357,9 @@ function createGameServer(port, cb) {
 					cbId = buf.readInt16BE();
 				}
 				let session = SessionMgr.get(client);
-				if (session == null) {
-					let server = ServerMgr.getCurrentServer();
-					console.error("socket data >>>>>>>>>>>>>", 'len', len, ', cmd', cmd, ', real size:', data.length, server.type, server.port);
-				}
+				let server = ServerMgr.getCurrentServer();
+				console.error("socket data >>>>>>>>>>>>>", 'len', len, ', cmd', cmd, ', real size:', data.length, server.type, server.port);
+				//
 				let arr = protoTrans[cmd].split('.');
 				let srvType = arr[0];
 				let handleName = arr[1];

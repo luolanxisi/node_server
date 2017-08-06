@@ -3,9 +3,11 @@
 const Dict = require(ROOT_DIR +'lib/collection/Dict');
 const MissionMgr = require(ROOT_DIR +'model/mission/MissionMgr');
 const RobotMgr = require(ROOT_DIR +'model/robot/RobotMgr');
+const ItemMgr = require(ROOT_DIR +'model/item/ItemMgr');
 
 const MISSION_MGR = 1;
 const ROBOT_MGR   = 2;
+const ITEM_MGR    = 3;
 
 module.exports = Role;
 
@@ -22,6 +24,7 @@ function Role(id) {
 	this.mgrDict = new Dict();
 	this.mgrDict.add(MISSION_MGR,  {class:MissionMgr, obj:null, waitQueue:[]}); // 当有请求开始读取时状态时等待队列不为空，读完后赋值并按顺序回调
 	this.mgrDict.add(ROBOT_MGR, {class:RobotMgr, obj:null, waitQueue:[]});
+	this.mgrDict.add(ITEM_MGR, {class:ItemMgr, obj:null, waitQueue:[]});
 }
 
 var pro = Role.prototype;
@@ -44,6 +47,18 @@ pro.setP2pPort = function(value) {
 
 pro.getP2pPort = function() {
 	return this.p2pPort;
+}
+
+pro.setRank = function(value) {
+	this.rank = value || 0;
+}
+
+pro.setMoney = function(value) {
+	this.money = value || 0;
+}
+
+pro.setGem = function(value) {
+	this.gem = value || 0;
 }
 
 pro.addGem = function(value) {
@@ -90,6 +105,10 @@ pro.getMissionMgr = function(cb) {
 
 pro.getRobotMgr = function(cb) {
 	this.getMgr(ROBOT_MGR, cb);
+}
+
+pro.getItemMgr = function(cb) {
+	this.getMgr(ITEM_MGR, cb);
 }
 
 pro.getMgr = function(key, cb) {
@@ -259,10 +278,15 @@ pro.packLoginData = function(cb) {
 				return cb(err);
 			}
 			ret.missionData = missionMgr.toData();
-			cb(null, ret);
+			self.getItemMgr(function(err, itemMgr) {
+				if (err) {
+					return cb(err);
+				}
+				ret.itemData = itemMgr.toData();
+				cb(null, ret);
+			});
 		});
 	});
-	// self.getMissionMgr();
 }
 
 pro.stampLastUse = function() {

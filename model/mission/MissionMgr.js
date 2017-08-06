@@ -12,22 +12,21 @@ module.exports = MissionMgr;
 function MissionMgr(roleId) {
 	DbPackEntity.call(this, "tbl_role", {"id":"roleId"}, "missionData");
 	this.roleId = roleId;
-	this.pool = new Dict();
 	this.curMission = 0;
 }
 
 util.inherits(MissionMgr, DbPackEntity);
 
-var pro = MissionMgr.prototype;
+const pro = MissionMgr.prototype;
 
 
-pro.add = function(mission) {
-	this.pool.add(mission.getId(), mission);
-}
+// pro.add = function(mission) {
+// 	this.pool.add(mission.getId(), mission);
+// }
 
-pro.get = function(id) {
-	return this.pool.get(id);
-}
+// pro.get = function(id) {
+// 	return this.pool.get(id);
+// }
 
 pro.setCurMission = function(value) {
 	this.curMission = value;
@@ -49,6 +48,7 @@ pro.register = function(cb) {
 		}
 		// 先初始化第一组任务，当通关BOSS关卡后会开启第二组任务
 		let mission = Mission.createInit(cfg.id);
+		this.curMission = parseInt(cfg.id);
 	}
 	cb();
 }
@@ -60,12 +60,7 @@ pro.load = function(cb) {
 			return cb(err);
 		}
 		let obj = JSON.parse(res[0].missionData);
-		for (let i in obj.elements) {
-			let missionData = obj.elements[i];
-			let mission = new Mission();
-			mission.load(missionData);
-			self.add(mission);
-		}
+		self.curMission = obj.curMission;
 		cb();
 	});
 }
@@ -87,23 +82,15 @@ pro.destory = function(cb) {
 }
 
 pro.pack = function() {
-	let elements = this.pool.getRaw();
-	let arr = [];
-	for (let i in elements) {
-		let element = elements[i];
-		arr.push(element.pack());
-	}
-	let ret = {elements:arr};
+	let ret = {
+		curMission : this.curMission
+	};
 	return ret;
 }
 
 pro.toData = function() {
-	let elements = this.pool.getRaw();
-	let arr = [];
-	for (let i in elements) {
-		let element = elements[i];
-		arr.push(element.toData());
-	}
-	let ret = {elements:arr};
+	let ret = {
+		curMission : this.curMission
+	};
 	return ret;
 }

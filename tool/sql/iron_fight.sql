@@ -19,8 +19,7 @@ CREATE TABLE `tbl_role` (
   `lastLogin` int(11) not null COMMENT '最后登录时间',
   `missionData` text NOT NULL,
   `robotData` text NOT NULL,
-  `equipData` text NOT NULL,
-  `talentData` text NOT NULL,
+  `itemData` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=innodb DEFAULT CHARSET=utf8 COMMENT='角色信息表';
 
