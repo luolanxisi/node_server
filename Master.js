@@ -94,7 +94,7 @@ const server = net.createServer((client) => {
 });
 
 server.on('error', (err) => {
-	throw err;
+	console.log('master server error:', err);
 });
 
 server.listen(masterCfg.port, () => {

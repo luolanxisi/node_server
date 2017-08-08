@@ -310,7 +310,7 @@ function createRpcServer(port, cb) {
 					}
 				}
 			} catch (e) {
-				console.error(e);
+				console.error('rpc server error:', e);
 			}
 		});
 
@@ -318,7 +318,7 @@ function createRpcServer(port, cb) {
 	});
 
 	server.on('error', (err) => {
-		throw err;
+		console.log('application server error:', err);
 	});
 
 	server.listen(port, () => {
@@ -410,7 +410,7 @@ function createGameServer(port, cb) {
 				}
 			} catch (e) {
 				let server = ServerMgr.getCurrentServer();
-				console.log("catch error", cmd, server, e);
+				console.log("game server error", cmd, server, e);
 			}
 		});
 
