@@ -9,6 +9,7 @@ const proto = require('./model/network/Proto').getDict();
 const protocolType = require('./model/network/Proto').getTypeDict();
 const sysCfg = require(BASE_PATH +'/model/system/SystemConfig').getDict();
 const BufferPool = require(BASE_PATH +'/lib/BufferPool');
+const TcpPackage = require(BASE_PATH +'/lib/TcpPackage');
 
 
 const regCase = {};
@@ -55,7 +56,7 @@ const time = parseInt(process.argv[3]) || 1000;
 
 const rttSync = new RttSync();
 const tickets = [
-	"14000000cda30c57db4168f241a3b90901001001d3e18659180000000100000002000000d2684371000000003715010001000000b2000000320000000400000041a3b90901001001e0010000416943710801a8c00000000087997e5907499a59010000000000000000007d018dad758016fc5291ea5d767829b29b2fef3f2a5c8e439d33b00a7ad45daaca7355c0b28c252ad1b9f6ec2e079ad610cc16c0d88bdbf05d4b8a9246a3d55a7be1c2573dc5bdb16d44007cd09167e1f03fed5f7e8bad5ae0c43614ab4824c2c0727e74bf03aca1c85d4f464bb10ee87632704e5541fef466f9ed08ca36d442",
+	"140000008e68390262f753d041a3b90901001001ec6f915918000000010000000200000032ca16740000000066df000001000000b2000000320000000400000041a3b90901001001e001000074ca16740401a8c0000000008bc58f590b75ab5901000000000000000000013ce763faad1312bbe337c861c874c520fd30f1565c06b40b4b946a194e6d9d05fa114258151c376c7b514880eca58e85f4b5d0228441ef2f6964d1d77b87b3d6c747a9145bb523cbcccbb47d0205c66e4048fccc8bc821af6df2fc74b42c9c2918b4a9b0636f7dad8039e8ef625646bc8e36a4cdea8cc77e7679076e20217a",
 	"14000000bf3b350df96d5438b22f080301001001d995d4581800000001000000020000006a0ff63a00000000812ca90007000000b20000003200000004000000b22f080301001001e00100006a0ff63a1701000a00000000958fc758153fe35801000000000000000000a7ec3ca1115b0e3123dfdbd2fa46d4f8547ecd18385db3959bc0e84233d9bc217d976b62dcdb9871cc088571287691495528a2e188a59f79f0242578ac207bf61efe96ba6c2bb55c0ffc8398d062016a0f55e58c0e5a57303f9068dee40c35a86e5eb357bfe5cbb94a39f993c977e294d377ddb0bf864e35d42a17653429e0fd"
 ];
 const ticket = tickets[idx];
@@ -89,14 +90,18 @@ const webClient = net.createConnection({host:"127.0.0.1", port:8000}, () => { //
 			startTest(client);
 		});
 
-		client.on('data', (data) => {
-			let buf = BufferPool.decorateBuffer(data);
-			let len = buf.readInt16BE();
-			let protocolType = buf.readUInt8();
-			let cmd = buf.readInt16BE();
-			let objStr = buf.readProtoString();
-			console.log("client len, cmd:", len, cmd, objStr);
+		let tcpPackage = new TcpPackage(function(data) {
+			let len = data.readInt16BE(0);
+			let protocolType = data.readUInt8(2);
+			let cmd = data.readInt16BE(3);
+			let jsonSize = data.readInt16BE(5);
+			let objStr = data.toString('utf8', 7);
+			console.log("client len:", len, ", cmd:", cmd, ", buffer size:", data.length, objStr);
 			regCase[cmd].recv(JSON.parse(objStr));
+		});
+
+		client.on('data', (data) => {
+			tcpPackage.addBuffer(data);
 		});
 
 		client.on('end', () => {

@@ -16,6 +16,7 @@ const BufferPool = require(ROOT_DIR +'/lib/BufferPool');
 const proto = require(ROOT_DIR +'model/network/Proto').getDict();
 const protoTrans = require(ROOT_DIR +'model/network/Proto').getTransDict();
 const protocolType = require(ROOT_DIR +'model/network/Proto').getTypeDict();
+const TcpPackage = require(ROOT_DIR +'/lib/TcpPackage');
 
 global.BufferPool = BufferPool;
 global.ServerMgr  = serverMgr;
@@ -342,7 +343,8 @@ function createGameServer(port, cb) {
 			console.log('client [game] error:', err);
 		});
 
-		client.on('data', (data) => {
+
+		let tcpPackage = new TcpPackage(function(data) {
 			let cmd;
 			try {
 				// if ( client.remoteAddress == "::ffff:127.0.0.1" )
@@ -412,6 +414,10 @@ function createGameServer(port, cb) {
 				let server = ServerMgr.getCurrentServer();
 				console.log("game server error", cmd, server, e);
 			}
+		});
+
+		client.on('data', (data) => {
+			tcpPackage.addBuffer(data);
 		});
 
 		//client.setNoDelay(true);
