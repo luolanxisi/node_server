@@ -38,6 +38,7 @@ pro.ROLE_UPDATE_INFO = function(roleId, msg, cb) {
 	let items      = msg.items;
 	let curRobotId = msg.curRobotId;
 	let robotList  = msg.robotList;
+	let robotWarList = msg.robotWarList;
 	RoleMgr.get(roleId, function(err, role) {
 		if (err) {
 			return cb(err);
@@ -59,7 +60,7 @@ pro.ROLE_UPDATE_INFO = function(roleId, msg, cb) {
 				if (err) {
 					return cb(err);
 				}
-				procRobot(role, curRobotId, robotList, function(err) {
+				procRobot(role, curRobotId, robotList, robotWarList, function(err) {
 					if (err) {
 						return cb(err);
 					}
@@ -100,8 +101,8 @@ function procItem(role, items, cb) {
 	}
 }
 
-function procRobot(role, curRobotId, robotList, cb) {
-	if (curRobotId == null && robotList == null) {
+function procRobot(role, curRobotId, robotList, robotWarList, cb) {
+	if (curRobotId == null && robotList == null && robotWarList == null) {
 		cb();
 	}
 	else {
@@ -127,6 +128,9 @@ function procRobot(role, curRobotId, robotList, cb) {
 						}
 					}
 				}
+			}
+			if (robotWarList != null) {
+				robotMgr.setWarList(robotWarList);
 			}
 			cb();
 		});

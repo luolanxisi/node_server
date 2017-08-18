@@ -14,6 +14,7 @@ function RobotMgr(roleId) {
 	this.pool = new Dict();
 	this.openEquips = new Dict();
 	this.curRobot = null;
+	this.warList = [];
 }
 
 util.inherits(RobotMgr, DbPackEntity);
@@ -61,6 +62,10 @@ pro.getCurRobot = function() {
 	return this.curRobot;
 }
 
+pro.setWarList = function(warList) {
+	this.warList = warList || [];
+}
+
 // ===== 每个mgr类必须实现方法 =====
 
 pro.register = function(cb) {
@@ -85,6 +90,7 @@ pro.load = function(cb) {
 		}
 		let obj = JSON.parse(res[0].robotData);
 		self.setCurRobot(obj.curRobotId);
+		self.warList = obj.warList || [];
 		for (let i in obj.elements) {
 			let robotData = obj.elements[i];
 			let robot = Robot.createLoad(robotData);
@@ -120,7 +126,8 @@ pro.pack = function() {
 	}
 	let ret = {
 		curRobotId : this.curRobot != null ? this.curRobot.getId() : 0,
-		elements   : arr
+		elements   : arr,
+		warList    : this.warList
 	};
 	return ret;
 }
@@ -134,7 +141,8 @@ pro.toData = function() {
 	}
 	let ret = {
 		curRobotId : this.curRobot != null ? this.curRobot.getId() : 0,
-		elements   : arr
+		elements   : arr,
+		warList    : this.warList
 	};
 	return ret;
 }

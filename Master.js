@@ -14,6 +14,7 @@ const srvCfg = require(ROOT_DIR +'config/server_config.json');
 
 function Master() {
 	this.srvDict = {};
+	this.msgCount = 0;
 	this.init();
 }
 
@@ -57,6 +58,13 @@ pro.regMessage = function(child, port) {
 					}
 				}
 				break;
+			case instruct.STOP:
+				++this.msgCount;
+				if (this.msgCount == serverMgr.getSize()) {
+					console.log('close all server', this.msgCount);
+					process.exit(1)
+				}
+				break;
 		}
 	});
 }
@@ -79,10 +87,10 @@ const server = net.createServer((client) => {
 				case 'stop':
 					for (let i in master.srvDict) {
 						let srv = master.srvDict[i];
+						console.log('stop port:', i);
 						srv.send({ins: instruct.STOP});
 						// srv.kill('SIGHUP');
 					}
-					process.exit(1)
 					break;
 			}
 		} catch (e) {

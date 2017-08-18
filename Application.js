@@ -82,6 +82,7 @@ function Rpc() {
 	// this.srvType = process.argv[3];
 	this.handleTypeDict = {};
 	this.remoteTypeDict = {};
+	this.lifeCyc = null;
 	this.cbList = new BucketArray(); // 远程调用回调函数
 }
 
@@ -90,6 +91,7 @@ Rpc.prototype.init = function() {
 	let server = ServerMgr.getById(App.srvId);
 	this.readHandle(server.getType());
 	this.readRemote(server.getType());
+	this.readLifeCyc(server.getType());
 	// server端rpc调用
 	ServerMgr.regDispatch('web');
 	ServerMgr.regDispatch('connector');
@@ -147,6 +149,14 @@ Rpc.prototype.readRemote = function(srvType) {
 	}
 }
 
+Rpc.prototype.readLifeCyc = function(srvType) {
+	let file = ROOT_DIR +"servers/"+ srvType +"/LifeCyc.js";
+	if (!fs.existsSync(file)) {
+		return;
+	}
+	this.lifeCyc = require(file);
+}
+
 Rpc.prototype.genCb = function(cb) {
 	let rpcCallback = new RpcCallback();
 	this.cbList.add(rpcCallback);
@@ -201,9 +211,19 @@ process.on('message', (msg) => {
 	// console.log('CHILD got message:', msg);
 	switch (msg.ins) {
 		case instruct.STOP:
-			server.close(); // 执行lifeCyc关服流程
-			process.exit(1)
-			process.send({ msg:'port '+ port +' close finish' });
+			let lifeCyc = App.rpc.lifeCyc;
+			if (lifeCyc == null || lifeCyc.beforeShutdown == null) {
+				process.send({ ins: instruct.STOP, msg: 'close finish' });
+				// process.exit(1)
+				return;
+			}
+			lifeCyc.beforeShutdown(App, function(err, res) {
+				if (err) {
+					console.error("Close server error:", err);
+				}
+				process.send({ ins: instruct.STOP, msg: 'close finish' });
+				// process.exit(1)
+			});
 			break;
 		case instruct.SYNC_SERVER_LIST:
 			serverMgr.fromData(msg.servers);

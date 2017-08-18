@@ -17,10 +17,11 @@ function RoleMgr() {
 	let self = this;
 	this.pool = new Dict();
 	this.waitQueueDict = {};
-	setInterval(function() {
+	this.tickId = setInterval(function() {
 		try {
 			self.save(function() {
-				console.log("save end >>>>>>", ServerMgr.getCurrentServer().id);
+				let server = ServerMgr.getCurrentServer();
+				console.log("save end >>>>>>", server.getType(), server.getId());
 			});
 		} catch (e) {
 			console.log("Save tick error:", e);
@@ -94,6 +95,20 @@ pro.checkGc = function(role, now) {
 	if ( now - role.getLastUse() > 300 ) { // 300
 		this.remove(role.getId(), Auxiliary.normalCb);
 		role.destory(Auxiliary.normalCb);
+	}
+}
+
+pro.destory = function(cb) {
+	clearInterval(this.tickId);
+	try {
+		this.save(function() {
+			let server = ServerMgr.getCurrentServer();
+			console.log("Close save end >>>>>>", server.getType(), server.getId());
+		});
+	} catch (e) {
+		console.log("Close save error:", e);
+	} finally {
+		cb();
 	}
 }
 

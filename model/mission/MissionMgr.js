@@ -12,7 +12,7 @@ module.exports = MissionMgr;
 function MissionMgr(roleId) {
 	DbPackEntity.call(this, "tbl_role", {"id":"roleId"}, "missionData");
 	this.roleId = roleId;
-	this.curMission = 0;
+	this.curMission = [];
 }
 
 util.inherits(MissionMgr, DbPackEntity);
@@ -48,7 +48,7 @@ pro.register = function(cb) {
 		}
 		// 先初始化第一组任务，当通关BOSS关卡后会开启第二组任务
 		let mission = Mission.createInit(cfg.id);
-		this.curMission = parseInt(cfg.id);
+		this.curMission = [parseInt(cfg.id)];
 	}
 	cb();
 }
@@ -60,7 +60,7 @@ pro.load = function(cb) {
 			return cb(err);
 		}
 		let obj = JSON.parse(res[0].missionData);
-		self.curMission = obj.curMission;
+		self.curMission = obj.curMission || [];
 		cb();
 	});
 }
