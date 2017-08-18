@@ -214,7 +214,7 @@ process.on('message', (msg) => {
 			let lifeCyc = App.rpc.lifeCyc;
 			if (lifeCyc == null || lifeCyc.beforeShutdown == null) {
 				process.send({ ins: instruct.STOP, msg: 'close finish' });
-				// process.exit(1)
+				process.exit(1)
 				return;
 			}
 			lifeCyc.beforeShutdown(App, function(err, res) {
@@ -222,7 +222,7 @@ process.on('message', (msg) => {
 					console.error("Close server error:", err);
 				}
 				process.send({ ins: instruct.STOP, msg: 'close finish' });
-				// process.exit(1)
+				process.exit(1)
 			});
 			break;
 		case instruct.SYNC_SERVER_LIST:
