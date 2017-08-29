@@ -266,7 +266,9 @@ pro.packLoginData = function(cb) {
 		name  : this.name,
 		rank  : this.rank,
 		money : this.money,
-		gem   : this.gem
+		gem   : this.gem,
+		regTime   : this.regTime,
+		lastLogin : this.lastLogin
 	};
 	self.getRobotMgr(function(err, robotMgr) {
 		if (err) {
