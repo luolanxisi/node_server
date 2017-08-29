@@ -224,6 +224,7 @@ pro.load = function(cb) {
 		self.regTime   = row.regTime;
 		self.lastLogin = row.lastLogin;
 		self.p2pPort   = row.p2pPort || 0;
+		self.first     = (self.regTime == self.lastLogin);
 		if ( self.regTime == self.lastLogin ) {
 			self.register(function(err, res) {
 				if ( err ) {
@@ -268,7 +269,8 @@ pro.packLoginData = function(cb) {
 		money : this.money,
 		gem   : this.gem,
 		regTime   : this.regTime,
-		lastLogin : this.lastLogin
+		lastLogin : this.lastLogin,
+		first     : this.first || false
 	};
 	self.getRobotMgr(function(err, robotMgr) {
 		if (err) {
