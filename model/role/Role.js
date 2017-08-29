@@ -272,6 +272,7 @@ pro.packLoginData = function(cb) {
 		lastLogin : this.lastLogin,
 		first     : this.first || false
 	};
+	this.first = false;
 	self.getRobotMgr(function(err, robotMgr) {
 		if (err) {
 			return cb(err);
