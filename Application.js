@@ -36,14 +36,14 @@ function Application() {
 	let clientPort = process.argv[5];
 	createRpcServer(port, function(err, res) {
 		if (err) {
-			console.error("start rpc server error", err);
+			aux.error(null, "start rpc server error", err);
 			return;
 		}
 		// 
 		if ( clientPort != "undefined" ) {
 			createGameServer(clientPort, function(err, res) {
 				if (err) {
-					console.error("start rpc server error", err);
+					aux.error(null, "start rpc server error", err);
 					return;
 				}
 				process.send({ ins: instruct.START_SERVER_FINISH, srvId: App.srvId});
@@ -110,7 +110,7 @@ Rpc.prototype.readHandle = function(srvType) {
 	for (let i in files) {
 		let file = files[i];
 		if ( file.indexOf("\.js") == -1 ) {
-			console.error("File in handle dir mush *.js :", file);
+			aux.error(null, "File in handle dir mush *.js :", file);
 			continue;
 		}
 		let filePath = dir +"/"+ file;
@@ -132,7 +132,7 @@ Rpc.prototype.readRemote = function(srvType) {
 	for (let i in files) {
 		let file = files[i];
 		if ( file.indexOf("\.js") == -1 ) {
-			console.error("File in remote dir mush *.js :", file);
+			aux.error(null, "File in remote dir mush *.js :", file);
 			continue;
 		}
 		let filePath = dir +"/"+ file;
@@ -183,7 +183,7 @@ function fitToServerHandle(clientSocket, session, buf, cmd) {
 	fitBuf.writeInt16BE(App.srvId);
 	let cbId = App.rpc.genCb(function(err, buf) {
 		if (err) {
-			console.error("Error in fitToServerHandle", err);
+			aux.error(null, "Error in fitToServerHandle", err);
 		}
 		clientSocket.write(buf.sliceRawBuffer());
 	});
@@ -208,7 +208,7 @@ function onError(err) {
 }
 
 process.on('message', (msg) => {
-	// console.log('CHILD got message:', msg);
+	// aux.log(null, 'CHILD got message:', msg);
 	switch (msg.ins) {
 		case instruct.STOP:
 			let lifeCyc = App.rpc.lifeCyc;
@@ -219,7 +219,7 @@ process.on('message', (msg) => {
 			}
 			lifeCyc.beforeShutdown(App, function(err, res) {
 				if (err) {
-					console.error("Close server error:", err);
+					aux.error(null, "Close server error:", err);
 				}
 				process.send({ ins: instruct.STOP, msg: 'close finish' });
 				process.exit(1)
@@ -249,14 +249,14 @@ process.on('message', (msg) => {
 function createRpcServer(port, cb) {
 	// ======== 与客户端进行socket通讯，以及和其他进程进行rpc通讯 ========
 	const server = net.createServer((client) => {
-		console.log('rpc connected');
+		aux.log(null, 'rpc connected');
 
 		client.on('end', () => {
-			console.log('client disconnected');
+			aux.log(null, 'client disconnected');
 		});
 
 		client.on('error', (err) => {
-			console.log('client [rpc] error:', err);
+			aux.log(null, 'client [rpc] error:', err);
 		});
 
 		client.on('data', (data) => {
@@ -267,7 +267,7 @@ function createRpcServer(port, cb) {
 				let cmd = buf.readInt16BE();
 				let fromSrvId = buf.readInt16BE();
 				let cbId = buf.readInt16BE();
-				console.log("rpc data >>>>>>>>>>>>>", 'type', pType, ', cmd', cmd);
+				aux.log(null, "rpc data >>>>>>>>>>>>>", 'type', pType, ', cmd', cmd);
 				if ( pType == protocolType.SERVER_REMOTE_CALL ) {
 					let procChain = buf.readProtoString();
 					let msgStr = buf.readProtoString();
@@ -277,7 +277,7 @@ function createRpcServer(port, cb) {
 					let remoteName = arr[1];
 					let funcName = arr[2];
 					let remote = App.rpc.remoteTypeDict[srvType][remoteName];
-					console.log('>>>', procChain);
+					aux.log(null, '>>>', procChain);
 					remote[funcName]([msg, function(err, obj) { // 原remote已被替换
 						let retBuf = BufferPool.createProtoBuffer(cmd, protocolType.SERVER_REMOTE_BACK);
 						retBuf.writeInt16BE(App.srvId); // srvId修改为本服，cbId不需要修改
@@ -303,7 +303,7 @@ function createRpcServer(port, cb) {
 					let srvType = arr[0];
 					let handleName = arr[1];
 					let funcName = arr[2];
-					// console.error('rpc handle', srvType+'.'+handleName+'.'+funcName);
+					// aux.error(null, 'rpc handle', srvType+'.'+handleName+'.'+funcName);
 					if ( pType == protocolType.SERVER_HANDLE_CALL ) { // 从rpc端过来的一定是目标服本身接收到，因此不用判断srvId
 						let roleId = buf.readUInt32BE(); // 读取玩家id
 						let handle = App.rpc.handleTypeDict[srvType][handleName];
@@ -327,11 +327,11 @@ function createRpcServer(port, cb) {
 						App.rpc.runCb(cbId, retBuf); // buf永远在write时才会slice
 					}
 					else {
-						console.error("rpc protocol type error >>>>>>>>>>>>>>>>", pType);
+						aux.error(null, "rpc protocol type error >>>>>>>>>>>>>>>>", pType);
 					}
 				}
 			} catch (e) {
-				console.error('rpc server error:', e);
+				aux.error(null, 'rpc server error:', e);
 			}
 		});
 
@@ -339,11 +339,11 @@ function createRpcServer(port, cb) {
 	});
 
 	server.on('error', (err) => {
-		console.log('application server error:', err);
+		aux.log(null, 'application server error:', err);
 	});
 
 	server.listen(port, () => {
-		console.log('rpc start listen', port);
+		aux.log(null, 'rpc start listen', port);
 		cb();
 	});
 }
@@ -351,16 +351,16 @@ function createRpcServer(port, cb) {
 function createGameServer(port, cb) {
 	// ======== 与客户端进行socket通讯，以及和其他进程进行rpc通讯 ========
 	const server = net.createServer((client) => {
-		console.log('client connected');
+		aux.log(null, 'client connected');
 
 		client.on('end', () => {
 			SessionMgr.remove(client);
-			console.log('client disconnected');
+			aux.log(null, 'client disconnected');
 		});
 
 		client.on('error', (err) => {
 			SessionMgr.remove(client);
-			console.log('client [game] error:', err);
+			aux.log(null, 'client [game] error:', err);
 		});
 
 
@@ -380,7 +380,7 @@ function createGameServer(port, cb) {
 				}
 				let session = SessionMgr.get(client);
 				let server = ServerMgr.getCurrentServer();
-				console.error("socket data >>>>>>>>>>>>>", 'len', len, ', cmd', cmd, ', real size:', data.length, server.type, server.port);
+				aux.error(null, "socket data >>>>>>>>>>>>>", 'len', len, ', cmd', cmd, ', real size:', data.length, server.type, server.port);
 				//
 				let arr = protoTrans[cmd].split('.');
 				let srvType = arr[0];
@@ -427,12 +427,12 @@ function createGameServer(port, cb) {
 						server.getSocket().write(fitBuf.sliceRawBuffer());
 					}
 					else {
-						console.error("client protocol type error >>>>>>>>>>>>>>>>", pType);
+						aux.error(null, "client protocol type error >>>>>>>>>>>>>>>>", pType);
 					}
 				}
 			} catch (e) {
 				let server = ServerMgr.getCurrentServer();
-				console.log("game server error", cmd, server, e);
+				aux.log(null, "game server error", cmd, server, e);
 			}
 		});
 
@@ -444,21 +444,21 @@ function createGameServer(port, cb) {
 	});
 
 	server.on('error', (err) => {
-		console.log('server has error', err);
+		aux.log(null, 'server has error', err);
 	});
 
 	server.listen(port, () => {
-		console.log('server start listen', port);
+		aux.log(null, 'server start listen', port);
 		cb();
 	});
 }
 
 process.on('exit', (code) => {
-	console.log(`Child exited with code ${code}`);
+	aux.log(null, `Child exited with code ${code}`);
 });
 
 process.on('close', (code, signal) => {
-	console.log(`child process terminated due to receipt of signal ${signal}`);
+	aux.log(null, `child process terminated due to receipt of signal ${signal}`);
 });
 
 
@@ -471,3 +471,4 @@ global.Auxiliary   = require(ROOT_DIR +'lib/Auxiliary')
 global.ErrorCode   = require(ROOT_DIR +'model/system/ErrorCode').getDict();
 global.MysqlExtend = require(ROOT_DIR +'lib/MysqlExtend').getInst();
 
+global.aux         = global.Auxiliary;
