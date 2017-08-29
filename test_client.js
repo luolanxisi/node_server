@@ -67,7 +67,7 @@ var client = null;
 var natClient = null; // NAT穿透辅助接口
 var roleId = null;
 
-const webClient = net.createConnection({host:"127.0.0.1", port:8000}, () => { // 用steam平台ticket进行登录 106.14.156.178
+const webClient = net.createConnection({host:"106.14.156.178", port:8000}, () => { // 用steam平台ticket进行登录 106.14.156.178
 	console.log('connected to web server!');
 	let buf = BufferPool.createBuffer();
 	buf.writeInt16BE(0);
@@ -156,6 +156,7 @@ function sROLE_UPDATE_INFO(client) {
 		items: [110001,110002,110003,110004,110005,110006,110007,110008,120001,120002,120003,120004,120005,120006,120007,120008,130001,130002,130003,130004,130005,130006,130007,130008],
 		curRobotId: 10001,
 		robotWarList: [10001, 10002, 10003],
+		first: false;
 		robotList: [
 			{
 				id : 10001,

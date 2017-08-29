@@ -43,6 +43,7 @@ pro.ROLE_UPDATE_INFO = function(roleId, msg, cb) {
 		if (err) {
 			return cb(err);
 		}
+		role.setFirst();
 		if (rank != null) {
 			role.setRank(rank);
 		}

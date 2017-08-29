@@ -225,7 +225,6 @@ pro.load = function(cb) {
 		self.lastLogin = row.lastLogin;
 		self.p2pPort   = row.p2pPort || 0;
 		self.first     = (self.regTime == self.lastLogin);
-		aux.log(null, "load:", self.first, self.regTime, self.lastLogin);
 		if ( self.regTime == self.lastLogin ) {
 			self.register(function(err, res) {
 				if ( err ) {
@@ -257,6 +256,10 @@ pro.setOffline = function(cb) {
 	cb();
 }
 
+pro.setFirst = function() {
+	this.first = false;
+}
+
 pro.destory = function(cb) {
 	cb();
 }
@@ -273,8 +276,6 @@ pro.packLoginData = function(cb) {
 		lastLogin : this.lastLogin,
 		first     : this.first || false
 	};
-	aux.log(null, "packLoginData:", self.first);
-	this.first = false;
 	self.getRobotMgr(function(err, robotMgr) {
 		if (err) {
 			return cb(err);
